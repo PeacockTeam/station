@@ -1,0 +1,18 @@
+{
+  "name": "armomole",
+  "version": "0.0.1",
+  "homepage": "https://github.com/PeacockTeam/station",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PeacockTeam/station.git"
+  },
+  "dependencies": {
+    "mongodb": ">= 0.9.0",
+    "express": ">= 2.5.2",
+    "stylus": ">= 0.0.1",
+    "jade": ">= 0.0.1"
+  },
+  "engines": {
+    "node": "*"
+  }
+}
