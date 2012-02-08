@@ -1,8 +1,9 @@
 
 var Audio = {
     album: [],
-    playlist: []
-}
+    playlist: [],
+    current: undefined 
+};
 
 $(function () {
     initVK();
@@ -47,22 +48,104 @@ function getSongs() {
 
 function getPlaylist() {
     $.ajax({
-        type: 'GET',
+        type: 'POST',
         url: "/api/get_playlist",
+        data: {
+            uid: VK.Auth.getSession().user.id,
+        },
         success: function(r) {
             if (r.error) {
                 console.log('Error: ', r.error);
             } else {
-                Audio.playlist = r.playlist;
+                Audio.playlist = r.songs;
+                Audio.current = r.current;
                 console.log("playlist", Audio.playlist);
-                
-                updateView();
             }
+            updateView();
         }
     });
 }
 
+function initActions() {
+    View.onPlaylistChanged(function(songs) {
+        $.ajax({
+            type: 'POST',
+            url: "/api/save_playlist",
+            data: {
+                uid: VK.Auth.getSession().user.id,
+                songs: songs
+            },
+            success: function(r) {
+                if (r.error) {
+                    console.log('Error: ', r.error);
+                } else {
+                    console.log('Playlist saved');
+                }
+            }
+        });
+    });
+
+    View.onPlaylistClicked({
+        on_select: function(song, callback) {
+            $.ajax({
+                type: 'POST',
+                url: "/api/select_song",
+                data: {
+                    uid: VK.Auth.getSession().user.id,
+                    song: song
+                },
+                success: function(r) {
+                    if (r.error) {
+                        console.log('Error: ', r.error);
+                    } else {
+                        console.log("Selected", song);
+                        callback();
+                    }
+                }
+            });
+        },
+
+        on_unselect: function(song, callback) {
+            $.ajax({
+                type: 'POST',
+                url: "/api/select_song",
+                data: {
+                    uid: VK.Auth.getSession().user.id,
+                    song: undefined
+                },
+                success: function(r) {
+                    if (r.error) {
+                        console.log('Error: ', r.error);
+                    } else {
+                        console.log("Unselected", song);
+                        callback();
+                    }
+                }
+            });
+        }
+    });
+
+    View.onSelectedSongRemoved(function() {
+        $.ajax({
+            type: 'POST',
+            url: "/api/select_song",
+            data: {
+                uid: VK.Auth.getSession().user.id,
+                song: undefined
+            },
+            success: function(r) {
+                if (r.error) {
+                    console.log('Error: ', r.error);
+                } else {
+                    console.log("Unselected");
+                }
+            }
+        });
+    });
+}
+
 function updateView() {
+
     var notInPlaylist = _.filter(Audio.album, function(song) {
         var found = _.find(Audio.playlist, function(p) {
             return p.aid == song.aid && p.owner_id == song.owner_id;
@@ -73,22 +156,10 @@ function updateView() {
     View.setAlbumTracks(notInPlaylist);            
     View.setPlaylist(Audio.playlist);
 
-    View.onPlaylistChanged(function(songs) {
-        console.log("Changed", songs);
-    });
-
-    View.onPlaylistClicked({
-        on_select: function(song, callback) {
-            console.log("Selected", song);
-            callback();
-        },
-
-        on_unselect: function(song, callback) {
-            console.log("Unselected", song);
-            callback();
-        }
-    });
-
-    View.selectSong(Audio.playlist[0]);
+    if (Audio.current) {
+        View.selectSong(Audio.current);
+    }
+    
+    initActions();
 }
 

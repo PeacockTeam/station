@@ -10,6 +10,6 @@ var View = {
 
     setCurrentSong: function (song) {
         var templ = _.template("<b><%= artist %></b> <span> - <%= title %> </span>");
-        $("#song-block").html(templ(song));
+        $("#song_block").html(templ(song));
     }
 };

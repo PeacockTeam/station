@@ -2,7 +2,7 @@
 var util = require("util"),
     url = require("url"),
     express = require("express")
-//    logic = require('./logic.js');
+    storage = require('./storage.js');
 
 var app = module.exports = express.createServer();
 
@@ -32,13 +32,18 @@ app.configure('production', function(){
 app.use(express.bodyParser());
 app.use(app.router);
 
-//Routes
-
 app.all('/*',function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next();
 });
+
+
+/* Engine */
+var current_song;
+
+
+/* Webapp routes */
 
 app.get('/', function(req, res) {
     res.redirect('/radio');
@@ -52,31 +57,40 @@ app.get('/radio', function(req, res){
     res.render('radio', { title: 'Radio' });
 });
 
-app.get('/api/get_playlist', function(req, res) {
+
+/* API routes */
+
+app.post('/api/get_playlist', function(req, res) {
     console.log('/api/get_playlist');
-    res.send({ playlist: [
-        {
-             aid: "135978633",
-             artist: "Robert Plant",
-             duration: "356",
-             lyrics_id: "5645220",
-             owner_id: "1070976",
-             title: "Song To The Siren",
-             url: "http://cs4890.vkontakte.ru/u24016347/audio/3947e7c53f58.mp3"
-        },
-        {
-            aid: "135755750",
-            artist: "Gabba Front Berlin",
-            duration: "176",
-            owner_id: "1070976",
-            title: "A Man Who Looks Like Me",
-            url: "http://cs1588.vkontakte.ru/u178718/audio/06a8acf5de10.mp3"
+
+    storage.getPlaylist(req.body.uid, function(songs) {
+        if (songs) {
+            res.send({
+                songs: songs,
+                current: current_song 
+            });
+        } else {
+            res.send({ error: "failed to get playlist" });
         }
-    ]});
+    });    
 });
 
-app.post('/api/set_playlist', function(req, res) {
-    console.log("set playlist");
+app.post('/api/save_playlist', function(req, res) {
+    console.log('/api/save_playlist');
+    
+    storage.savePlaylist(req.body.uid, req.body.songs);
+    res.send("success");
+});
+
+app.post('/api/select_song', function(req, res) {
+    console.log('/api/select_song');
+
+    if (req.body.song) {
+        current_song = req.body.song; 
+    } else {
+        current_song = undefined;
+    }
+
     res.send("success");
 });
 

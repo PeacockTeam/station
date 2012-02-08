@@ -8,27 +8,20 @@ $(function() {
 
 var View = (function() {
 
-    $(function () {
-        $("#playlist").bind("sortremove", function(event, ui) {
-            clearIfSelected(ui.item); 
-        });
-    });
-
     function getUnicSongID(song) {
         return song.aid + song.owner_id;
     }
     
     function setSelection(li) {
         li.parent().children().each(function(i, e) {
-            clearIfSelected(e);
+            clearIfSelected($(e));
         });
         li.toggleClass("ui-state-default ui-state-highlight");
     }
 
     function clearIfSelected(li) {
-        var e = $(li); 
-        if (e.hasClass('ui-state-highlight')) {
-            e.toggleClass("ui-state-default ui-state-highlight");
+        if (li.hasClass('ui-state-highlight')) {
+            li.toggleClass("ui-state-default ui-state-highlight");
         }
     }
 
@@ -86,6 +79,16 @@ var View = (function() {
                     }
                 }
             }); 
+        },
+
+        onSelectedSongRemoved: function (handler) {
+            $("#playlist").bind("sortremove", function(event, ui) {
+                var li = $(ui.item);
+                if (li.hasClass('ui-state-highlight')) {
+                    handler();
+                }
+                clearIfSelected(li); 
+            });
         },
 
         onPlaylistChanged: function(handler) {

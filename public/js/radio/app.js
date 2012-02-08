@@ -1,11 +1,28 @@
 
-var Audio = {
-    playlist: [],
-    nowPlaying: null;
-}
+var Player = {
+    songs: [],
+    current: null,
 
-$(function () {
+    initMusic: function() {
+        soundManager.flashVersion = 9;
+        soundManager.debugMode = false;
+    },
+
+    playSong: function(url) {
+        soundManager.createSound({
+            id: 'music',
+            url: url,
+            volume: 100,
+            autoLoad: true,
+            stream: false,
+            autoPlay: true
+        });
+    }
+};
+
+$().ready(function () {
     initVK();
+    Player.initMusic();
 });
 
 function initVK() {
@@ -22,7 +39,7 @@ function onLogin(r) {
     if (r.session) {
         console.log('User has logged in:', r.session.mid);
         View.toggleMainView();
-        getSongs();
+        getPlaylist();
     }
     else {
         console.log('auth failed');
@@ -32,18 +49,22 @@ function onLogin(r) {
 
 function getPlaylist() {
     $.ajax({
-        type: 'GET',
+        type: 'POST',
         url: "/api/get_playlist",
+        data: {
+            uid: VK.Auth.getSession().user.id,
+        },
         success: function(r) {
             if (r.error) {
                 console.log('Error: ', r.error);
             } else {
-                Audio.playlist = r.playlist;
-                Audio.nowPlaying = r.current;
+                Player.songs = r.songs;
+                Player.current = r.current;
 
-                console.log("playlist", Audio.playlist, Audio.nowPlaying);
-                
-                updateView();
+                if (Player.current) {
+                    View.setCurrentSong(Player.current);
+                    Player.playSong(Player.current.url);
+                }
             }
         }
     });
@@ -63,7 +84,4 @@ function getSongUrl(song) {
     });
 }*/
 
-function updateView() {
-    View.setCurrentSong(Audio.nowPlaying);
-}
 

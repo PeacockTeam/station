@@ -13,18 +13,12 @@ db.open(function(error) {
     if (error) throw error;
 });
 
-exports.savePlaylist = function(playlist) {
-    db.collection('playlists', function(err, collection) {
-        collection.insert(playlist);
-    });
-}
-
-exports.getPlaylist = function(playlist, result) {
+exports.getPlaylist = function(uid, result) {
     db.collection("playlists", function(err, collection) {
-        collection.find(data, function(err, cursor) {
+        collection.find({ 'uid': uid }, function(err, cursor) {
             cursor.toArray(function(err, items) {
                 if (items.length > 0) {
-                    result(items);
+                    result(items[0].songs);
                 } else {
                     result();
                 }
@@ -32,3 +26,13 @@ exports.getPlaylist = function(playlist, result) {
         });
     });
 }
+
+exports.savePlaylist = function(uid, songs) {
+    db.collection('playlists', function(err, collection) {
+        collection.update(
+            { uid: uid },
+            { '$set': { 'songs': songs } },
+            { 'upsert': true });
+    });
+}
+
