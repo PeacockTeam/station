@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+        <script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+        
+        <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css"></link>
+
+        <script src="streamer.js"></script>
+    </head>
+    <body>
+        
+        <div class="row">
+
+            <script id="playlist-entry-tmpl" type="text/x-jquery-tmpl">
+                <li>${playtime} - ${song}</li>
+            </script>
+
+            <div class="offset1 span6">
+                Server
+                <ul id="server-playlist"></ul> 
+            </div>
+            
+            <div class="span6">
+                Client
+                <ul id="client-playlist"></ul> 
+            </div>
+
+        </div>
+
+    </body>
+</html>

@@ -1,4 +1,3 @@
-
 var Player = {
     songs: [],
     current: null,

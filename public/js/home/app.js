@@ -1,4 +1,3 @@
-
 var Audio = {
     album: [],
     playlist: [],
@@ -162,4 +161,3 @@ function updateView() {
     
     initActions();
 }
-
