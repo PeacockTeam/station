@@ -2,7 +2,8 @@
 var util = require("util"),
     url = require("url"),
     express = require("express")
-    storage = require('./storage.js');
+    storage = require('./storage.js'),
+    StreamManager = require('./stream_manager.js');
 
 var app = module.exports = express.createServer();
 
@@ -60,30 +61,27 @@ app.get('/radio', function(req, res){
 
 /* API routes */
 
-app.post('/api/get_playlist', function(req, res) {
-    console.log('/api/get_playlist');
-
-    storage.getPlaylist(req.body.uid, function(songs) {
-        if (songs) {
-            res.send({
-                songs: songs,
-                current: current_song 
-            });
+app.post('/api/stream/get_playlist', function(req, res) {
+    console.log('/api/stream/get_playlist');
+    
+    SreamManager.getPlaylist(req.body, function(playlist) {
+        if (stream) {
+            res.send({ playlist : playlist });
         } else {
-            res.send({ error: "failed to get playlist" });
+            res.send({ error: "failed to get stream" });
         }
-    });    
+    });
 });
 
-app.post('/api/save_playlist', function(req, res) {
-    console.log('/api/save_playlist');
+app.post('/api/stream/save_stream', function(req, res) {
+    console.log('/api/stream/save_stream');
     
     storage.savePlaylist(req.body.uid, req.body.songs);
     res.send("success");
 });
 
-app.post('/api/select_song', function(req, res) {
-    console.log('/api/select_song');
+app.post('/api/stream/play_song', function(req, res) {
+    console.log('/api/strea/play_song');
 
     if (req.body.song) {
         current_song = req.body.song; 
@@ -95,5 +93,5 @@ app.post('/api/select_song', function(req, res) {
 });
 
 app.listen(8080);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+console.log("Express server listening on port 8080 in %s mode", app.settings.env);
 

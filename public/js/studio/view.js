@@ -69,7 +69,7 @@ var View = (function() {
                     if (li.hasClass("ui-state-highlight")) {
                         // song unselected
                         handlers.on_unselect(song, function() {
-                            li.toggleClass("ui-state-default ui-state-highlight");
+                            clearIfSelected(li);
                         });
                     } else {
                         // song selected
@@ -79,16 +79,6 @@ var View = (function() {
                     }
                 }
             }); 
-        },
-
-        onSelectedSongRemoved: function (handler) {
-            $("#playlist").bind("sortremove", function(event, ui) {
-                var li = $(ui.item);
-                if (li.hasClass('ui-state-highlight')) {
-                    handler();
-                }
-                clearIfSelected(li); 
-            });
         },
 
         onPlaylistChanged: function(handler) {
