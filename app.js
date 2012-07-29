@@ -22,11 +22,11 @@ app.configure(function(){
         });
 
 app.configure('development', function(){
-        app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+        app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
         });
 
 app.configure('production', function(){
-        app.use(express.errorHandler()); 
+        app.use(express.errorHandler());
         });
 
 app.use(express.bodyParser());
@@ -38,10 +38,8 @@ app.all('/*',function(req, res, next) {
     next();
 });
 
-
 /* Engine */
 var current_song;
-
 
 /* Webapp routes */
 
@@ -67,17 +65,17 @@ app.post('/api/get_playlist', function(req, res) {
         if (songs) {
             res.send({
                 songs: songs,
-                current: current_song 
+                current: current_song
             });
         } else {
             res.send({ error: "failed to get playlist" });
         }
-    });    
+    });
 });
 
 app.post('/api/save_playlist', function(req, res) {
     console.log('/api/save_playlist');
-    
+
     storage.savePlaylist(req.body.uid, req.body.songs);
     res.send("success");
 });
@@ -86,7 +84,7 @@ app.post('/api/select_song', function(req, res) {
     console.log('/api/select_song');
 
     if (req.body.song) {
-        current_song = req.body.song; 
+        current_song = req.body.song;
     } else {
         current_song = undefined;
     }
@@ -95,5 +93,5 @@ app.post('/api/select_song', function(req, res) {
 });
 
 app.listen(8080);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 
+// console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

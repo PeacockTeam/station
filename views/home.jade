@@ -1,19 +1,23 @@
-script(src="/js/home/app.js")
-script(src="/js/home/view.js")
+extends layout
 
-#login_view.row
-    .span4
-        #login_button
+block scripts
+  script(src="/js/home/app.js")
+  script(src="/js/home/view.js")
 
-#main_view.row
-    .span12.offset4
-        h1 Заполните плейлист 
-        .row
-            .span6
-                h2 Доступные песни 
-                ul#album.connectedSortable
+block content
+  #login_view.row
+      .span4
+          #login_button
 
-            .span6
-                h2 Плэйлист
-                ul#playlist.connectedSortable
+  #main_view.row
+      .span12.offset4
+          h1 Заполните плейлист
+          .row
+              .span6
+                  h2 Доступные песни
+                  ul#album.connectedSortable
+
+              .span6
+                  h2 Плэйлист
+                  ul#playlist.connectedSortable
 

@@ -1,14 +1,18 @@
-script(src="/js/radio/app.js")
-script(src="/js/radio/view.js")
-script(src="/js/radio/lib/soundmanager2.min.js")
+extends layout
 
-#login_view.row
-    .span4
-        #login_button
+block scripts
+  script(src="/js/radio/app.js")
+  script(src="/js/radio/view.js")
+  script(src="/js/radio/lib/soundmanager2.min.js")
 
-#main_view.row
-    .span6.offset4
-        br
-        img(src="http://the-bulb.com/wp-content/uploads/2011/09/Radio1.jpg")
-        br
-        #song_block
+block content
+  #login_view.row
+      .span4
+          #login_button
+
+  #main_view.row
+      .span6.offset4
+          br
+          img(src="http://the-bulb.com/wp-content/uploads/2011/09/Radio1.jpg")
+          br
+          #song_block
