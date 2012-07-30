@@ -65,7 +65,7 @@ app.post('/api/stream/get_playlist', function(req, res) {
         if (playlist) {
             res.send({ playlist : playlist });
         } else {
-            res.send({ error: "failed to get playlist" });
+            res.send({ error: "failed to get stream" });
         }
     });
 });
