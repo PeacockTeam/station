@@ -102,16 +102,16 @@ app.post('/api/stream/stop_playing', function(req, res) {
     });
 });
 
-app.post('/api/stream/get_current_songs', function(req, res) {
-    console.log('/api/stream/get_current_songs');
+app.post('/api/stream/get_playback', function(req, res) {
+    console.log('/api/stream/get_playback');
 
     var stream_id = req.body.stream_id;
 
-    StreamManager.getCurrentSongs(stream_id, function(current_songs) {
-        if (current_songs) {
-            res.send({ current_songs : current_songs });
+    StreamManager.getPlayback(stream_id, function(playback) {
+        if (playback) {
+            res.send({ playback : playback });
         } else {
-            res.send({ error: "failed to get current songs" });
+            res.send({ error: "failed to get playback" });
         }
     });
 });

@@ -64,17 +64,17 @@ exports.stopPlaying = function(stream_id, callback) {
     });
 }
 
-exports.getCurrentSongs = function(stream_id, callback) {
+exports.getPlayback = function(stream_id, callback) {
 
     Storage.getStream(stream_id, function(stream) {
         if (stream) {
             /* If has timemarks, calc */
             
-            var current_songs = stream.playlist.map(function(song) {
+            var playback = stream.playlist.map(function(song) {
                 return song;
             });
 
-            callback({ current_songs: current_songs });
+            callback(playback);
         } else {
             callback();
         }
