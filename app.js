@@ -1,8 +1,7 @@
 
 var util = require("util"),
     url = require("url"),
-    express = require("express")
-    storage = require('./storage.js'),
+    express = require("express"),
     StreamManager = require('./stream_manager.js');
 
 var app = module.exports = express.createServer();
@@ -13,22 +12,22 @@ process.on("uncaughtException", function(error) {
 });
 
 app.configure(function(){
-        app.set('views', __dirname + '/views');
-        app.set('view engine', 'jade');
-        app.use(express.bodyParser());
-        app.use(express.methodOverride());
-        app.use(require('stylus').middleware({ src: __dirname + '/public' }));
-        app.use(app.router);
-        app.use(express.static(__dirname + '/public'));
-        });
+    app.set('views', __dirname + '/views');
+    app.set('view engine', 'jade');
+    app.use(express.bodyParser());
+    app.use(express.methodOverride());
+    app.use(require('stylus').middleware({ src: __dirname + '/public' }));
+    app.use(app.router);
+    app.use(express.static(__dirname + '/public'));
+    });
 
 app.configure('development', function(){
-        app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-        });
+    app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+    });
 
 app.configure('production', function(){
-        app.use(express.errorHandler()); 
-        });
+    app.use(express.errorHandler()); 
+    });
 
 app.use(express.bodyParser());
 app.use(app.router);
@@ -38,10 +37,6 @@ app.all('/*',function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next();
 });
-
-
-/* Engine */
-var current_song;
 
 
 /* Webapp routes */
@@ -64,34 +59,63 @@ app.get('/radio', function(req, res){
 app.post('/api/stream/get_playlist', function(req, res) {
     console.log('/api/stream/get_playlist');
     
-    SreamManager.getPlaylist(req.body, function(playlist) {
-        if (stream) {
+    var stream_id = req.body.stream_id;
+    
+    SreamManager.getPlaylist(stream_id, function(playlist) {
+        if (playlist) {
             res.send({ playlist : playlist });
         } else {
-            res.send({ error: "failed to get stream" });
+            res.send({ error: "failed to get playlist" });
         }
     });
 });
 
-app.post('/api/stream/save_stream', function(req, res) {
-    console.log('/api/stream/save_stream');
-    
-    storage.savePlaylist(req.body.uid, req.body.songs);
-    res.send("success");
+app.post('/api/stream/save_playlist', function(req, res) {
+    console.log('/api/stream/save_playlist');
+   
+    var stream_id = req.body.stream_id,
+        playlist = req.body.playlist;
+
+    StreamManager.savePlaylist(stream_id, playlist, function() {
+        res.send("ok");
+    });
 });
 
 app.post('/api/stream/play_song', function(req, res) {
-    console.log('/api/strea/play_song');
+    console.log('/api/stream/play_song');
 
-    if (req.body.song) {
-        current_song = req.body.song; 
-    } else {
-        current_song = undefined;
-    }
+    var stream_id = req.body.stream_id,
+        song_id = req.body.song_id;
 
-    res.send("success");
+    StreamManager.playSong(stream_id, song_id, function() {
+        res.send("ok");
+    });
+});
+
+app.post('/api/stream/stop_playing', function(req, res) {
+    console.log('/api/stream/stop_playing');
+
+    var stream_id = req.body.stream_id;
+
+    StreamManager.stopPlaying(stream_id, function() {
+        res.send("ok");
+    });
+});
+
+app.post('/api/stream/get_current_songs', function(req, res) {
+    console.log('/api/stream/get_current_songs');
+
+    var stream_id = req.body.stream_id;
+
+    StreamManager.getCurrentSongs(stream_id, function(current_songs) {
+        if (current_songs) {
+            res.send({ current_songs : current_songs });
+        } else {
+            res.send({ error: "failed to get current songs" });
+        }
+    });
 });
 
 app.listen(8080);
-console.log("Express server listening on port 8080 in %s mode", app.settings.env);
+console.log("Express is running...");
 

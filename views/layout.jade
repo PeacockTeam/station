@@ -1,4 +1,4 @@
-!!!
+!!! 5
 html
   head
     title= title
@@ -8,9 +8,12 @@ html
     script(src="http://documentcloud.github.com/underscore/underscore-min.js")
     script(src="http://vkontakte.ru/js/api/openapi.js")
 
+  block scripts
+
+  block css
     link(rel="stylesheet", href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css")
     link(rel="stylesheet", href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css")
     link(rel="stylesheet", href="/css/style.css")
 
-  body!= body
-
+  body
+    block content

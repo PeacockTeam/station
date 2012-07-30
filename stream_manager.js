@@ -5,9 +5,9 @@ function setStreamTimemarks(new_stream, old_stream) {
 
 }
 
-exports.getPlaylist = function(data, callback) {
+exports.getPlaylist = function(stream_id, callback) {
 
-    storage.getStream(data.stream_id, function(stream) {
+    Storage.getStream(stream_id, function(stream) {
         if (stream) {
             callback(stream.playlist);   
         } else {
@@ -17,46 +17,66 @@ exports.getPlaylist = function(data, callback) {
     });
 }
 
-exports.savePlaylist = function(data, callback) {
+exports.savePlaylist = function(stream_id, playlist, callback) {
 
-    storage.getStream(data.stream_id, function(old_stream) {
-        var new_stream = {
-            playlist: data.playlist;
-        };
+    Storage.getStream(stream_id, function(old_stream) {
+        
+        /* Set new timemarks to stream, if active */
+        
+        var new_stream = { playlist: playlist };
 
         if (old_stream && old_stream.is_playing) {
             setStreamTimemarks(new_stream, old_stream);
         }
 
-        storage.saveStream(data.stream_id, new_stream);
+        Storage.saveStream(stream_id, new_stream);
         callback();
     });
 }
 
-exports.playSong = function(data, callback) {
+exports.playSong = function(stream_id, song_id, callback) {
     
-    storage.getStream(data.stream_id, function(stream) {
+    Storage.getStream(stream_id, function(stream) {
         if (stream) {
-            stream.timemarks
-            callback(stream.playlist);   
+            
+            /* Set new timemarks to stream */
+            //stream.timemars <- song_id;
+
+            Storage.saveStream(stream_id, stream);
         }
+        
         callback();
     });
-
 }
 
-exports.stopPlaying = function(data, callback) {
+exports.stopPlaying = function(stream_id, callback) {
     
-    storage.getStream(data.stream_id, function(stream) {
+    Storage.getStream(stream_id, function(stream) {
         if (stream) {
-            stream.timemarks
-            callback(stream.playlist);   
+
+            /* Remove timemarks if active */
+            //stream.timemarks = null
+
+            Storage.saveStream(stream_id, stream);
         }
+        
         callback();
     });
-
 }
 
-exports.getNextSongs = function(data, callback) {
+exports.getCurrentSongs = function(stream_id, callback) {
 
+    Storage.getStream(stream_id, function(stream) {
+        if (stream) {
+            /* If has timemarks, calc */
+            
+            var current_songs = stream.playlist.map(function(song) {
+                return song;
+            });
+
+            callback({ current_songs: current_songs });
+        } else {
+            callback();
+        }
+    });
 }

@@ -1,24 +1,18 @@
+extends layout
 
-script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js")
-script(src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js")
-script(src="http://documentcloud.github.com/underscore/underscore-min.js")
-script(src="http://vkontakte.ru/js/api/openapi.js")
+block scripts
+  script(src="/js/radio/app.js")
+  script(src="/js/radio/view.js")
+  script(src="/js/radio/lib/soundmanager2.min.js")
 
-link(rel="stylesheet", href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css")
-link(rel="stylesheet", href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css")
-link(rel="stylesheet", href="/css/style.css")
+block content
+  #login_view.row
+      .span4
+          #login_button
 
-script(src="/js/radio/app.js")
-script(src="/js/radio/view.js")
-script(src="/js/radio/lib/soundmanager2.min.js")
-
-#login_view.row
-    .span4
-        #login_button
-
-#main_view.row
-    .span6.offset4
-        br
-        img(src="http://the-bulb.com/wp-content/uploads/2011/09/Radio1.jpg")
-        br
-        #song_block
+  #main_view.row
+      .span6.offset4
+          br
+          img(src="http://the-bulb.com/wp-content/uploads/2011/09/Radio1.jpg")
+          br
+          #song_block
