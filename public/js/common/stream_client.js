@@ -14,17 +14,20 @@ var StreamClient = (function() {
          *      stream_id
          *  }
          */
-        getStream : function(data, callback) {
+        getPlaylist : function(data, callback) {
             $.ajax({
                 type: 'POST',
-                url: "/api/stream/get_stream",
+                url: "/api/stream/get_playlist",
                 data: data,
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);
                     } else {
-                        callback(r.stream);
+                        callback && callback(r.playlist);
                     }
+                },
+                error: function() {
+                    logError("request failed");
                 }
             });
         },
@@ -32,20 +35,20 @@ var StreamClient = (function() {
         /**
          * data = {
          *     stream_id,
-         *     stream
+         *     playlist
          * }
          */
-        saveStream : function(data, callback) {
+        savePlaylist : function(data, callback) {
             $.ajax({
                 type: 'POST',
-                url: "/api/stream/save_stream",
-                data: data
+                url: "/api/stream/save_playlist",
+                data: data,
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);
                     } else {
-                        logMessage('stream saved');
-                        callback();
+                        logMessage('playlist saved');
+                        callback && callback();
                     }
                 },
                 error: function() {
@@ -57,7 +60,7 @@ var StreamClient = (function() {
         /**
          * data = {
          *     stream_id,
-         *     song,
+         *     song_id,
          * }
          */
         playSong : function(data, callback) {
@@ -69,9 +72,12 @@ var StreamClient = (function() {
                     if (r.error) {
                         logError(r.error);
                     } else {
-                        logMessage("Playing song: ", song);
-                        callback();
+                        logMessage("Playing song:" + data.song_id);
+                        callback && callback();
                     }
+                },
+                error: function() {
+                    logError("request failed");
                 }
             });
         },
@@ -81,7 +87,7 @@ var StreamClient = (function() {
          *     stream_id
          * }
          */
-        stopPlaying : function(data) {
+        stopPlaying : function(data, callback) {
             $.ajax({
                 type: 'POST',
                 url: "/api/stream/stop_playing",
@@ -91,11 +97,37 @@ var StreamClient = (function() {
                         logError(r.error);
                     } else {
                         logMessage("Playing stopped");
-                        callback();
+                        callback && callback();
                     }
+                },
+                error: function() {
+                    logError("request failed");
                 }
             });
-        }        
+        },
+
+        /**
+         * data = {
+         *     stream_id
+         * }
+         */
+        getPlayback : function(data, callback) {
+            $.ajax({
+                type: 'POST',
+                url: "/api/stream/get_playback",
+                data: data,
+                success: function(r) {
+                    if (r.error) {
+                        logError(r.error);
+                    } else {
+                        callback && callback(r.playback);
+                    }
+                },
+                error: function() {
+                    logError("request failed");
+                }
+            });
+        }
 
     };
 })();

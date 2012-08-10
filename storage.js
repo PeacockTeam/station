@@ -31,7 +31,7 @@ exports.saveStream = function(stream_id, stream) {
     db.collection('streams', function(err, collection) {
         collection.update(
             { stream_id: stream_id },
-            { '$set': { 'playlist': stream.playlist } },
+            stream, //{ '$set': { 'playlist': stream.playlist } },
             { 'upsert': true });
     });
 }

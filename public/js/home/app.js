@@ -35,23 +35,22 @@ function getUserPlaylist() {
         count: 20
     }, function(r) {
         if (r.error) {
-            console.log('failed to get album: ', r.error);
+            console.log('failed to get user playlist: ', r.error);
         } else {
             Audio.album = r.response;
             console.log("album: ", Audio.album);
 
-            getStream();
+            getRadioPlaylist();
         }
     });
 }
 
-function getStream() {
-    StreamClient.getStream({
+function getRadioPlaylist() {
+    StreamClient.getPlaylist({
         stream_id : VK.Auth.getSession().user.id
     },
-    function(stream) {
-        Audio.playlist = r.songs;
-        Audio.current = r.current;
+    function(playlist) {
+        Audio.playlist = playlist;
         console.log("playlist", Audio.playlist);
         
         updateView();
@@ -61,13 +60,13 @@ function getStream() {
 function initActions() {
     View.onPlaylistChanged(function(songs) {
         
-        StreamClient.saveStream({
+        StreamClient.savePlaylist({
             stream_id: VK.Auth.getSession().user.id,
-            stream: songs
+            playlist: songs
         },
         function() {
             /* Update StreamPlayer */
-            /* Update View */
+            /* Update View (Selection) */
         });
     });
 
@@ -75,11 +74,11 @@ function initActions() {
         on_select: function(song, callback) {
             StreamClient.playSong({
                 stream_id: VK.Auth.getSession().user.id,
-                song: song
+                song_id: song.aid
             },
             function() {
                 /* Update StreamPlayer */
-                /* Update View */
+                /* Update View (Selection) */
             });
         },
 
@@ -89,7 +88,7 @@ function initActions() {
             },
             function() {
                 /* Update StreamPlayer */
-                /* Update View */
+                /* Update View (Selection)*/
             });
         }
     });
@@ -107,9 +106,9 @@ function updateView() {
     View.setAlbumTracks(notInPlaylist);            
     View.setPlaylist(Audio.playlist);
 
-    if (Audio.current) {
+    /*if (Audio.current) {
         View.selectSong(Audio.current);
-    }
+    }*/
     
     initActions();
 }

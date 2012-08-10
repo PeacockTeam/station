@@ -61,7 +61,7 @@ app.post('/api/stream/get_playlist', function(req, res) {
     
     var stream_id = req.body.stream_id;
     
-    SreamManager.getPlaylist(stream_id, function(playlist) {
+    StreamManager.getPlaylist(stream_id, function(playlist) {
         if (playlist) {
             res.send({ playlist : playlist });
         } else {
