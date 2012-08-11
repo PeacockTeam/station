@@ -1,115 +1,156 @@
 var Storage = require('./storage.js'),
           _ = require('underscore');
 
-var PlaybackCalculator = (function() {
+var StreamPlayback = (function() {
+
+    function getPlaylistCycleData(playlist) {
+        
+        var full_cycle_time = 0,
+            song_start_times = [];
+
+        for (var i = 0; i < playlist.length; i++) {
+            song_start_times.push(full_cycle_time);
+            full_cycle_time += playlist[i].duration * 1000;
+        }
+
+        return {
+            full_cycle_time: full_cycle_time,
+            song_start_times: song_start_times
+        };
+    }
+
+    function getSongIndexById(playlist, song_id) {
+        for (var i = 0; i < playlist.length; i++) {
+            if (playlist[i].aid == song_id) {
+                return i;
+            }
+        }
+    }
+    
+    function getPlayingSongIndex(playlist, playdata, now) {
+        var current_cycle_playtime = (now - playdata.start_time) % playdata.full_cycle_time,
+            sorted_index = _.sortedIndex(playdata.song_start_times, current_cycle_playtime);
+        return sorted_index - 1; 
+    }
+
+    function getCurrentCycleStartTime(playlist, playdata, now) {
+        var full_cycles = Math.floor( (now - playdata.start_time) / playdata.full_cycle_time );
+        return playdata.start_time + playdata.full_cycle_time * full_cycles; 
+    }
 
     return {
 
-        getPlayData: function(playlist, current_song_id) {
+        isPlaying: function(stream) {
+            return stream.playdata !== undefined;
+        },
 
-            var t_before_current_song = 0,
-                t_playlist = 0,
-                playtimes = [];
-
-            var current_song_found = false;
-
-            for (var i = 0; i < playlist.length; i++) {
-                var song = playlist[i];
-
-                // 1) check if i-th song has current id
-                if (!current_song_found) {
-                    if (playlist[i].aid == current_song_id) {
-                        current_song_found = true;
-                        t_before_current_song = t_playlist;
-                    }
-                }
-
-                // 2) save time when i-th song starts
-                playtimes.push(t_playlist);
-
-                // 3) increase total playlist time
-                t_playlist += song.duration * 1000;
+        startPlaying: function(stream, song_id, now) {
+    
+            var song_index = getSongIndexById(stream.playlist, song_id);
+            if (!song_index) {
+                // песни с таким id нет в плейлисте
+                return;
             }
 
-            var t_start = new Date.getTime() - t_before_current_song;
+            // вычисляем параметры проигрывания
+            var playlist_cycle_data = getPlaylistCycleData(stream.playlist);
+           
+            // вычисляем точку отсчета для плейлиста
+            var playlist_start_time = now - playlist_cycle_data.song_start_times[song_index]; 
 
-            return {
-                t_start: t_start,
-                t_playlist: t_playlist,
-                playtimes: playtimes
-            };
+            stream.playdata = _.extend(playlist_cycle_data, {
+                start_time: playlist_start_time
+            });
         },
 
-        getModifiedPlaydata: function(new_playlist, old_playlist, old_playdata) {
-
-            //1) определить текущую песню
-            var t_now = new Date.getTime(),
-                t_current_playlist_cycle_time = (t_now - old_playdata.t_start) % old_playdata.t_playlist,
-                current_song_index = _.sortedIndex(old_playdata.playtimes, t_current_playlist_cycle_time);
-
-            //2) найти её в новом плейлисте
-
-            var current_song = old_playlist[current_song_index],
-                new_current_song_index = _.find(new_playlist, function(song) { return song.aid == current_song.aid; });
-
-
-            //3) высчитать разницу во времени
-            //4) обновить
-
-
-            return {
-                t_start: t_start,
-                t_playlist: t_playlist,
-                playtimes: playtimes
-            };
+        stopPlaying: function(stream) {
+            if (this.isPlaying(stream)) {
+                delete stream.playdata;
+            }
         },
 
-        getPlayback: function(playlist, playdata) {
+        updateActivePlaylist: function(stream, new_playlist, now) {
+            
+            // достаём песню, которая проигрывается в данный момент
+            var current_song_index = getPlayingSongIndex(stream.playlist, stream.playdata, now); 
+            var current_song = stream.playlist[current_song_index];
+
+            // находим её в новом плейлисте
+            var new_song_index = getSongIndex(new_playlist, current_song.aid); 
+            if (!new_song_index) {
+                /* если в новом плейлисте нет текущей песни - прекращаем проигрывание */
+                stopPlaying(); 
+                return;
+            }
+
+            // вычисляем параметры проигрывания для нового плейлиста
+            var new_playlist_cycle_data = getPlaylistCycleData(new_playlist);
+            
+            // время начала проигрывания текущей песни должно остаться прежним для нового плейлиста
+            var current_cycle_start_time = getCurrentCycleStartTime(stream.playlist, stream.playdata, now);
+            var song_start_time = current_cycle_start_time + stream.playdata.song_start_times[current_song_index];
+            var new_playlist_start_time = song_start_time - new_playlist_cycle_data.song_start_times[new_song_index]; 
+            
+            stream.playdata = _.extend(new_playlist_cycle_data, {
+                start_time: new_playlist_start_time
+            });
+        },
+
+        getPlayback: function(stream, now) {
 
             var songs = [];
 
-            var t_now = new Date.getTime(),
-                t_current_playlist_cycle_time = (t_now - playdata.t_start) % playdata.t_playlist,
-                current_song_index = _.sortedIndex(playdata.playtimes, t_current_playlist_cycle_time);
+            var playing_song_index = getPlayingSongIndex(stream.playlist, stream.playdata, now),
+                current_cycle_start_time = getCurrentCycleStartTime(stream.playlist, stream.playdata, now);
 
-            var t_song_start = playdata.playtimes[current_song_index],
-                t_playback_total = 0;
+            var playing_song_start_time =
+                current_cycle_start_time +
+                stream.playdata.song_start_times[playing_song_index];
 
-            var t_current_song_offset = t_now - t_song_start;
+            var total_playback_time = 0,
+                playing_song_offset = now - playing_song_start_time;
 
             function need_more_songs() {
+                console.log("need more songs()");
+
                 if (songs.length < 2) {
-                    return true; /* At list one next song for caching */
+                    return true; // как минимум еще одна песня должна отсылаться для кэширования 
                 }
 
                 var MIN_PLAYBACK_TIME = 10 * 60 * 1000; // 10 minutes
-                if (t_playback_total - t_current_song_offset < MIN_PLAYBACK_TIME) {
-                    return true; /* Total playback time must be long enough */
+                
+                console.log(total_playback_time + " " + MIN_PLAYBACK_TIME);
+
+                if (total_playback_time - playing_song_offset < MIN_PLAYBACK_TIME) {
+                    return true; // total playback time must be long enough
                 }
 
                 return false;
             }
+            
+            var song_start_time = playing_song_start_time,
+                song_index = playing_song_index;
 
             while (need_more_songs()) {
 
                 var song = _.extend(
-                    playlist[current_song_index],
-                    {
-                        start_time: t_song_start
-                    });
+                {
+                    start_time: song_start_time
+                },
+                stream.playlist[song_index]);
 
                 songs.push(song);
 
-                current_song_index = (current_song_index + 1) % playlist.length;
+                song_index = (song_index + 1) % stream.playlist.length;
 
-                t_playback_total += song.duration * 1000;
-                t_song_start += song.duration * 1000;
+                total_playback_time += song.duration * 1000;
+                song_start_time += song.duration * 1000;
             }
 
             return { songs: songs };
         }
     };
-});
+})();
 
 exports.getPlaylist = function(stream_id, callback) {
 
@@ -123,6 +164,8 @@ exports.getPlaylist = function(stream_id, callback) {
     });
 }
 
+exports.streamPlayback = StreamPlayback;
+
 exports.savePlaylist = function(stream_id, playlist, callback) {
 
     Storage.getStream(stream_id, function(stream) {
@@ -130,7 +173,7 @@ exports.savePlaylist = function(stream_id, playlist, callback) {
         if (stream) {
 
             if (stream.playdata) {
-                var current_song_id = stream.
+          //      var current_song_id = stream.
 
             }
 
@@ -155,7 +198,7 @@ exports.savePlaylist = function(stream_id, playlist, callback) {
 
         callback();
     });
-}
+};
 
 exports.playSong = function(stream_id, song_id, callback) {
     
@@ -171,7 +214,7 @@ exports.playSong = function(stream_id, song_id, callback) {
         
         callback();
     });
-}
+};
 
 exports.stopPlaying = function(stream_id, callback) {
     
@@ -187,7 +230,7 @@ exports.stopPlaying = function(stream_id, callback) {
         
         callback();
     });
-}
+};
 
 exports.getPlayback = function(stream_id, callback) {
 
@@ -209,4 +252,4 @@ exports.getPlayback = function(stream_id, callback) {
             callback();
         }
     });
-}
+};
