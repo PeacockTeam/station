@@ -4,7 +4,7 @@ var streamPlayback = require('./stream_manager.js').streamPlayback;
 var playlist1 = [
     {
         aid: 1,
-        duration: 10
+        duration: 5 
     },
     {
         aid: 2,
@@ -12,7 +12,7 @@ var playlist1 = [
     },
     {
         aid: 3,
-        duration: 10
+        duration: 15
     },
     {
         aid: 4,
@@ -43,17 +43,22 @@ var playlist2 = [
     }
 ];
 
+var playlist3 = [
+];
+
 
 var stream = {
     playlist: playlist1
 };
 
 streamPlayback.startPlaying(stream, 2, 100 * 1000);
-
-
 console.log(stream);
+console.log(streamPlayback.getPlayback(stream, 234 * 1000 ));
 
-console.log(streamPlayback.getPlayback(stream, 200 * 1000 ));
+streamPlayback.updateActivePlaylist(stream, playlist3, 235 * 1000); 
+console.log(stream);
+console.log(streamPlayback.getPlayback(stream, 236 * 1000 ));
+
 
 
 

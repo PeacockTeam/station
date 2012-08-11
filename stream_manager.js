@@ -2,6 +2,8 @@ var Storage = require('./storage.js'),
           _ = require('underscore');
 
 var StreamPlayback = (function() {
+    
+    var MIN_PLAYBACK_TIME = 2 * 60 * 1000; // 60 seconds minutes
 
     function getPlaylistCycleData(playlist) {
         
@@ -47,8 +49,9 @@ var StreamPlayback = (function() {
         startPlaying: function(stream, song_id, now) {
     
             var song_index = getSongIndexById(stream.playlist, song_id);
-            if (!song_index) {
+            if (song_index == undefined) {
                 // песни с таким id нет в плейлисте
+                console.log("Warning");
                 return;
             }
 
@@ -71,15 +74,21 @@ var StreamPlayback = (function() {
 
         updateActivePlaylist: function(stream, new_playlist, now) {
             
+            if (!this.isPlaying(stream)) {
+                console.log("Warning");
+                return;
+            }
+            
             // достаём песню, которая проигрывается в данный момент
             var current_song_index = getPlayingSongIndex(stream.playlist, stream.playdata, now); 
             var current_song = stream.playlist[current_song_index];
 
             // находим её в новом плейлисте
-            var new_song_index = getSongIndex(new_playlist, current_song.aid); 
-            if (!new_song_index) {
+            var new_song_index = getSongIndexById(new_playlist, current_song.aid); 
+            if (new_song_index == undefined) {
                 /* если в новом плейлисте нет текущей песни - прекращаем проигрывание */
-                stopPlaying(); 
+
+                this.stopPlaying(stream); 
                 return;
             }
 
@@ -90,13 +99,20 @@ var StreamPlayback = (function() {
             var current_cycle_start_time = getCurrentCycleStartTime(stream.playlist, stream.playdata, now);
             var song_start_time = current_cycle_start_time + stream.playdata.song_start_times[current_song_index];
             var new_playlist_start_time = song_start_time - new_playlist_cycle_data.song_start_times[new_song_index]; 
-            
+           
+            // вносим изменения в stream
             stream.playdata = _.extend(new_playlist_cycle_data, {
                 start_time: new_playlist_start_time
             });
+            stream.playlist = new_playlist;
         },
 
         getPlayback: function(stream, now) {
+            
+            if (!this.isPlaying(stream)) {
+                console.log("Warning");
+                return;
+            }
 
             var songs = [];
 
@@ -111,20 +127,13 @@ var StreamPlayback = (function() {
                 playing_song_offset = now - playing_song_start_time;
 
             function need_more_songs() {
-                console.log("need more songs()");
-
                 if (songs.length < 2) {
                     return true; // как минимум еще одна песня должна отсылаться для кэширования 
                 }
 
-                var MIN_PLAYBACK_TIME = 10 * 60 * 1000; // 10 minutes
-                
-                console.log(total_playback_time + " " + MIN_PLAYBACK_TIME);
-
                 if (total_playback_time - playing_song_offset < MIN_PLAYBACK_TIME) {
                     return true; // total playback time must be long enough
                 }
-
                 return false;
             }
             
