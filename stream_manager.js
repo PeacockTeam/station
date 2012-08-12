@@ -3,7 +3,7 @@ var Storage = require('./storage.js'),
 
 var StreamPlayback = (function() {
     
-    var MIN_PLAYBACK_TIME = 2 * 60 * 1000; // 60 seconds minutes
+    var MIN_PLAYBACK_TIME = 5 * 60 * 1000; // 5 minutes
 
     function getPlaylistCycleData(playlist) {
         
@@ -87,7 +87,6 @@ var StreamPlayback = (function() {
             var new_song_index = getSongIndexById(new_playlist, current_song.aid); 
             if (new_song_index == undefined) {
                 /* если в новом плейлисте нет текущей песни - прекращаем проигрывание */
-
                 this.stopPlaying(stream); 
                 return;
             }
@@ -167,7 +166,6 @@ exports.getPlaylist = function(stream_id, callback) {
         if (stream) {
             callback(stream.playlist);   
         } else {
-            /* Return empty playlist */
             callback([]);
         }
     });
@@ -177,50 +175,40 @@ exports.streamPlayback = StreamPlayback;
 
 exports.savePlaylist = function(stream_id, playlist, callback) {
 
+    var now = new Date().getTime();
+
     Storage.getStream(stream_id, function(stream) {
 
         if (stream) {
-
-            if (stream.playdata) {
-          //      var current_song_id = stream.
-
+            /* обновляем существующий стрим */
+            if (StreamPlayback.isPlaying(stream)) {
+                StreamPlayback.updateActivePlaylist(stream, playlist, now);
+            } else {
+                stream.playlist = playlist;
             }
-
-            stream.playlist = playlist;
             Storage.saveStream(stream_id, stream);
 
         } else {
+            /* создаем новый стрим */
             Storage.saveStream(stream_id, {
                 stream_id: stream_id,
                 playlist: playlist
             });
         }
-        /* Set new timemarks to stream, if active */
-
-        //var new_stream = { playlist: playlist };
-
-        /*
-        if (old_stream && old_stream.is_playing) {
-            setStreamTimemarks(new_stream, old_stream);
-        }
-        */
 
         callback();
     });
 };
 
 exports.playSong = function(stream_id, song_id, callback) {
-    
+
+    var now = new Date().getTime();
+
     Storage.getStream(stream_id, function(stream) {
         if (stream) {
-
-            stream.song_id = song_id;
-            /* Set new timemarks to stream */
-            //stream.timemars <- song_id;
-
+            StreamPlayback.startPlaying(stream, song_id, now);
             Storage.saveStream(stream_id, stream);
         }
-        
         callback();
     });
 };
@@ -229,34 +217,21 @@ exports.stopPlaying = function(stream_id, callback) {
     
     Storage.getStream(stream_id, function(stream) {
         if (stream) {
-
-            delete stream.song_id;
-            /* Remove timemarks if active */
-            //stream.timemarks = null
-
+            StreamPlayback.stopPlaying(stream);
             Storage.saveStream(stream_id, stream);
         }
-        
         callback();
     });
 };
 
 exports.getPlayback = function(stream_id, callback) {
 
+    var now = new Date().getTime();
+
     Storage.getStream(stream_id, function(stream) {
         if (stream) {
-            /* If has timemarks, calc */
-
-            var current_song = _.find(stream.playlist, function(song) {
-                return song.aid == stream.song_id;
-            });
-
-            if (current_song) {
-                callback({current_song: current_song});
-            } else {
-                callback();
-            }
-
+            var playback = StreamPlayback.getPlayback(stream, now);
+            callback({playback: playback});
         } else {
             callback();
         }
