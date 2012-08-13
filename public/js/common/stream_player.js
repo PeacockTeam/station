@@ -23,14 +23,14 @@ var StreamPlayer = (function() {
 				stream: false,
 				autoPlay: true
 			});
-		}
+		},
 		
 		stopPlaying: function() {
 			soundManager.stop('music');		
 		}
 	};
 	
-	Player.initMusic();
+	//Player.initMusic();
 	
     return {
 		playStream: function(stream_id) {

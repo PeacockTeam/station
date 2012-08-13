@@ -65,14 +65,14 @@ app.post('/api/stream/get_playlist', function(req, res) {
         if (playlist) {
             res.send({ playlist : playlist });
         } else {
-            res.send({ error: "failed to get stream" });
+            res.send({ error: "failed to get playlist" });
         }
     });
 });
 
 app.post('/api/stream/save_playlist', function(req, res) {
     console.log('/api/stream/save_playlist');
-   
+
     var stream_id = req.body.stream_id,
         playlist = req.body.playlist;
 

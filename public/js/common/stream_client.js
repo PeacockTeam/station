@@ -18,7 +18,8 @@ var StreamClient = (function() {
             $.ajax({
                 type: 'POST',
                 url: "/api/stream/get_playlist",
-                data: data,
+				contentType: "application/json",
+                data: JSON.stringify(data),
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);
@@ -38,11 +39,12 @@ var StreamClient = (function() {
          *     playlist
          * }
          */
-        savePlaylist : function(data, callback) {
-            $.ajax({
+        savePlaylist : function(data, callback) {			
+			$.ajax({
                 type: 'POST',
                 url: "/api/stream/save_playlist",
-                data: data,
+				contentType: "application/json",
+                data: JSON.stringify(data),
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);
@@ -67,7 +69,8 @@ var StreamClient = (function() {
             $.ajax({
                 type: 'POST',
                 url: "/api/stream/play_song",
-                data: data,
+				contentType: "application/json",
+                data: JSON.stringify(data),
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);
@@ -91,7 +94,8 @@ var StreamClient = (function() {
             $.ajax({
                 type: 'POST',
                 url: "/api/stream/stop_playing",
-                data: data,
+				contentType: "application/json",
+                data: JSON.stringify(data),
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);
@@ -115,7 +119,8 @@ var StreamClient = (function() {
             $.ajax({
                 type: 'POST',
                 url: "/api/stream/get_playback",
-                data: data,
+				contentType: "application/json",
+                data: JSON.stringify(data),
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);

@@ -59,7 +59,7 @@ function getRadioPlaylist() {
 
 function initActions() {
     View.onPlaylistChanged(function(songs) {
-        
+		
         StreamClient.savePlaylist({
             stream_id: VK.Auth.getSession().user.id,
             playlist: songs

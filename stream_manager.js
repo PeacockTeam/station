@@ -160,6 +160,8 @@ var StreamPlayback = (function() {
     };
 })();
 
+exports.streamPlayback = StreamPlayback;
+
 exports.getPlaylist = function(stream_id, callback) {
 
     Storage.getStream(stream_id, function(stream) {
@@ -171,14 +173,11 @@ exports.getPlaylist = function(stream_id, callback) {
     });
 }
 
-exports.streamPlayback = StreamPlayback;
-
 exports.savePlaylist = function(stream_id, playlist, callback) {
 
     var now = new Date().getTime();
 
     Storage.getStream(stream_id, function(stream) {
-
         if (stream) {
             /* обновляем существующий стрим */
             if (StreamPlayback.isPlaying(stream)) {
@@ -229,9 +228,12 @@ exports.getPlayback = function(stream_id, callback) {
     var now = new Date().getTime();
 
     Storage.getStream(stream_id, function(stream) {
-        if (stream) {
+
+        console.log(stream);
+
+        if (stream && StreamPlayback.isPlaying(stream)) {
             var playback = StreamPlayback.getPlayback(stream, now);
-            callback({playback: playback});
+            callback(playback);
         } else {
             callback();
         }
