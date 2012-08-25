@@ -5,6 +5,21 @@
 //object:SMSound play(id:string, [options object])
 //object:SMSound stop(id:string)
 
+$().ready(function () {
+	console.log("init soundManager");
+
+	soundManager.setup({
+		url: '.',  
+		flashVersion: 9,
+		onready: function() {
+			onsole.log("soundManager is ready");
+		},
+		ontimeout: function() {
+			console.log("ontimeout");
+		}
+	});	
+});
+
 var QueuedPlaybackLoader = (function() {
 
 	var songs_queue = [],
@@ -196,11 +211,6 @@ var StreamPlayer = (function() {
 				
 		stopPlaying: function() {
 			PlaybackPlayer.stopPlaying();
-		},
-		
-		init: function() {
-			soundManager.flashVersion = 9;
-			//soundManager.debugMode = false;
 		}
     };
 })();
