@@ -1,4 +1,4 @@
-var Audio = {
+var AudioBlock = {
     album: [],
     playlist: [],
     current: undefined 
@@ -37,8 +37,8 @@ function getUserPlaylist() {
         if (r.error) {
             console.log('failed to get user playlist: ', r.error);
         } else {
-            Audio.album = r.response;
-            console.log("album: ", Audio.album);
+            AudioBlock.album = r.response;
+            console.log("album: ", AudioBlock.album);
 
             getRadioPlaylist();
         }
@@ -50,8 +50,8 @@ function getRadioPlaylist() {
         stream_id : VK.Auth.getSession().user.id
     },
     function(playlist) {
-        Audio.playlist = playlist;
-        console.log("playlist", Audio.playlist);
+        AudioBlock.playlist = playlist;
+        console.log("playlist", AudioBlock.playlist);
         
         updateView();
     });
@@ -96,15 +96,15 @@ function initActions() {
 
 function updateView() {
 
-    var notInPlaylist = _.filter(Audio.album, function(song) {
-        var found = _.find(Audio.playlist, function(p) {
+    var notInPlaylist = _.filter(AudioBlock.album, function(song) {
+        var found = _.find(AudioBlock.playlist, function(p) {
             return p.aid == song.aid && p.owner_id == song.owner_id;
         });
         return !found;
     });
    
     View.setAlbumTracks(notInPlaylist);            
-    View.setPlaylist(Audio.playlist);
+    View.setPlaylist(AudioBlock.playlist);
 
     /*if (Audio.current) {
         View.selectSong(Audio.current);

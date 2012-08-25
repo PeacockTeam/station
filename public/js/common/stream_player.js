@@ -1,23 +1,7 @@
 
-//object:SMSound onPosition(id:string, msecOffset:integer, callback:function, [scope])
-//object:SMSound setPosition(id:string,msecOffset:integer)
-
-//object:SMSound play(id:string, [options object])
-//object:SMSound stop(id:string)
-
 $().ready(function () {
-	console.log("init soundManager");
-
-	soundManager.setup({
-		url: '.',  
-		flashVersion: 9,
-		onready: function() {
-			onsole.log("soundManager is ready");
-		},
-		ontimeout: function() {
-			console.log("ontimeout");
-		}
-	});	
+	soundManager.flashVersion = 9;
+    soundManager.debugMode = false;
 });
 
 var QueuedPlaybackLoader = (function() {
@@ -28,7 +12,7 @@ var QueuedPlaybackLoader = (function() {
 	function loadNextSong() {
 		
 		if (currently_loading_sound) {
-			throw "Assertion failed: currenty_loading_sound must be undefined";
+			throw "Assertion failed: currently_loading_sound must be undefined";
 		}
 		
 		var song = songs_queue.shift();
@@ -38,10 +22,9 @@ var QueuedPlaybackLoader = (function() {
 			return;
 		}
 		
-		console.log("Loading song: " + song.aid);
-		
-		if (soundManager.getSoundById("a" + song.aid)) {
+		if (soundManager.getSoundById("a" + song.aid) !== undefined) {
 			// If sound was loaded already
+			console.log("Sound already loaded");
 			loadNextSong();
 		}
 		
@@ -72,7 +55,7 @@ var QueuedPlaybackLoader = (function() {
 			if (currently_loading_sound) {
 				
 				var next_song = songs_queue[0];
-				if (next_song && currently_loading_sound.id == next_song.aid) {
+				if (next_song !== undefined && next_song.aid == currently_loading_sound.id) {
 					// Next song is already loading. Ok, do nothing
 					return;
 				} else {
@@ -90,7 +73,7 @@ var QueuedPlaybackLoader = (function() {
 var PlaybackPlayer = (function() {
 
 	var songs_queue = [];
-	var currenty_playing_sound;
+	var currently_playing_sound;
 		
 	function stopPlaying() {
 		if (currently_playing_sound) {
@@ -101,13 +84,16 @@ var PlaybackPlayer = (function() {
 
 	function updatePlaying() {
 
+		console.log("updatePlaying()");
+	
 		var now = new Date().getTime();
 		
 		var current_song = _.find(songs_queue, function(song) {
-			return song.start_time <= now && now < song.end_time;
+			return song.start_time <= now && now < song.stop_time;
 		});
 		
 		if (current_song == undefined) {
+			console.log("No songs in queue, stop playing");
 			// No songs in queue, return
 			stopPlaying();
 			return;
@@ -118,47 +104,61 @@ var PlaybackPlayer = (function() {
 			console.log("Failed to get sound, waiting for second...");
 			setTimeout(updatePlaying, 1000);
 			return;
-		}		
-		
-		if (currently_playing_sound) {
-			if (currently_playing_sound.id == sound.id) {
-				// Same sound playing. OK, just check restrictions
-				
-			} else {
-				stopPlaying();
-					
-				var song_position_offset = now - current_song.start_time;
-					
-				switch (sound.readyState) {
-				case 1: // loading
-					if (sound.duration < song_position_offset + 5000) {
-						console.log("Sound is still loading, waiting for second...");
-						setTimeout(updatePlaying, 1000);
-					}
-					
-				case 3: // loaded
-					sound.play({
-						from: song_position_offset,
-						onstop: function() {
-							updatePlaying();
-						}					
-					});
-					
-					currenty_playing_sound = sound;		
-					break;
-						
-				case 2: // failed error
-				case 0: // uninitialized
-				default:
-					console.log("Failed to get sound, waiting for 5 seconds...");
-					setTimeout(updatePlaying, 5000);
-					return;
-				}					
-			}
 		}
 		
+		console.log("currently_playing_sound: ", currently_playing_sound);
+		
+		var song_position_offset = now - current_song.start_time;
+		
+		if (currently_playing_sound != undefined && currently_playing_sound.id == sound.id) {
+			// Same sound playing
+			var offsetError = Math.abs(currently_playing_sound.position - song_position_offset);
+			
+			console.log("Offset error: ", offsetError);
+			console.log(currently_playing_sound.position, song_position_offset);
+			
+			if (offsetError < 1000) {
+				// Don't need to fix anything
+				return;
+			} else {
+				// OffsetError is to large, start again to fix it
+			}
+		}			
+			
+		stopPlaying();
+						
+		switch (sound.readyState) {
+		case 1: // loading
+			//console.log("Loading: ", sound.duration, song_position_offset + 5000);
+			if (sound.duration < song_position_offset + 5000) {
+				console.log("Sound is still loading, waiting for second...");
+				setTimeout(updatePlaying, 1000);
+				return;
+			}
+			// Go ahead to case 3
+					
+		case 3: // loaded
+			console.log("Start playing song at: ", song_position_offset);
+			sound.setPosition(song_position_offset);
+			sound.play({
+				onfinish: function() {
+					console.log("onstop() called");
+					updatePlaying();
+				}
+			});
+					
+			currently_playing_sound = sound;		
+			break;
+						
+		case 2: // failed error
+		case 0: // uninitialized
+		default:
+			console.log("Failed to get sound, waiting for 5 seconds...");
+			setTimeout(updatePlaying, 5000);
+			return;
+		}					
 	}
-	
+			
 	return {
 		playPlayback: function(playback) {
 			songs_queue = [];
@@ -171,7 +171,7 @@ var PlaybackPlayer = (function() {
 		
 		stopPlaying: stopPlaying
 	};
-});
+})();
 
 var StreamPlayer = (function() {
 	

@@ -3,7 +3,8 @@ var Player = {
     current: null,
 
     initMusic: function() {
-        soundManager.flashVersion = 9;
+        console.log("initMusic()");
+		soundManager.flashVersion = 9;
         soundManager.debugMode = false;
     },
 
@@ -21,7 +22,6 @@ var Player = {
 
 $().ready(function () {
     initVK();
-    Player.initMusic();
 });
 
 function initVK() {
