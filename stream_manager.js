@@ -147,6 +147,8 @@ var StreamPlayback = (function() {
                 },
                 stream.playlist[song_index]);
 
+                song.stop_time = song_start_time + song.duration * 1000;
+
                 songs.push(song);
 
                 song_index = (song_index + 1) % stream.playlist.length;
@@ -155,7 +157,7 @@ var StreamPlayback = (function() {
                 song_start_time += song.duration * 1000;
             }
 
-            return { songs: songs };
+            return { songs: songs, server_time: now };
         }
     };
 })();
@@ -228,9 +230,6 @@ exports.getPlayback = function(stream_id, callback) {
     var now = new Date().getTime();
 
     Storage.getStream(stream_id, function(stream) {
-
-        console.log(stream);
-
         if (stream && StreamPlayback.isPlaying(stream)) {
             var playback = StreamPlayback.getPlayback(stream, now);
             callback(playback);
