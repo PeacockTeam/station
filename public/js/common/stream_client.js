@@ -124,6 +124,7 @@ var StreamClient = (function() {
                 success: function(r) {
                     if (r.error) {
                         logError(r.error);
+						callback && callback();
                     } else {
                         callback && callback(r.playback);
                     }

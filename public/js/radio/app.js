@@ -1,24 +1,3 @@
-var Player = {
-    songs: [],
-    current: null,
-
-    initMusic: function() {
-        console.log("initMusic()");
-		soundManager.flashVersion = 9;
-        soundManager.debugMode = false;
-    },
-
-    playSong: function(url) {
-        soundManager.createSound({
-            id: 'music',
-            url: url,
-            volume: 100,
-            autoLoad: true,
-            stream: false,
-            autoPlay: true
-        });
-    }
-};
 
 $().ready(function () {
     initVK();
@@ -38,49 +17,16 @@ function onLogin(r) {
     if (r.session) {
         console.log('User has logged in:', r.session.mid);
         View.toggleMainView();
-        getPlaylist();
+        
+		StreamPlayer.setCallbacks({
+			on_song_changed: function(song) {
+				View.setCurrentSong(song);
+			}
+		});
+		StreamPlayer.playStream(VK.Auth.getSession().user.id);
     }
     else {
         console.log('auth failed');
         alert('Sorry, authentification failed');
     }
 }
-
-function getPlaylist() {
-    $.ajax({
-        type: 'POST',
-        url: "/api/get_playlist",
-        data: {
-            uid: VK.Auth.getSession().user.id,
-        },
-        success: function(r) {
-            if (r.error) {
-                console.log('Error: ', r.error);
-            } else {
-                Player.songs = r.songs;
-                Player.current = r.current;
-
-                if (Player.current) {
-                    View.setCurrentSong(Player.current);
-                    Player.playSong(Player.current.url);
-                }
-            }
-        }
-    });
-}
-
-/*
-function getSongUrl(song) {
-    VK.Api.call('audio.get', {
-        aids: song.aid,
-        uid: song.owner_id,
-    }, function(r) {
-        if (r.error) {
-            console.log('failed to get album: ', r.error);
-        } else {
-            r.response
-        }
-    });
-}*/
-
-

@@ -62,10 +62,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="stream_manager.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="stream_manager.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/stream_manager.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="52" selection-start="789" selection-end="789" vertical-scroll-proportion="0.54848045">
+            <state line="159" column="17" selection-start="5745" selection-end="5745" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -80,10 +80,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="app.js" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="app.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="113" column="35" selection-start="2880" selection-end="2880" vertical-scroll-proportion="0.0">
+            <state line="108" column="47" selection-start="2694" selection-end="2694" vertical-scroll-proportion="0.6063676">
               <folding />
             </state>
           </provider>
@@ -596,11 +596,6 @@
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="113" column="35" selection-start="2880" selection-end="2880" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/storage.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="31" column="26" selection-start="833" selection-end="833" vertical-scroll-proportion="0.0" />
@@ -618,7 +613,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/stream_manager.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="52" selection-start="789" selection-end="789" vertical-scroll-proportion="0.54848045">
+        <state line="159" column="17" selection-start="5745" selection-end="5745" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="108" column="47" selection-start="2694" selection-end="2694" vertical-scroll-proportion="0.6063676">
           <folding />
         </state>
       </provider>

@@ -1,4 +1,4 @@
-var AudioBlock = {
+var AudioData = {
     album: [],
     playlist: [],
     current: undefined 
@@ -37,8 +37,8 @@ function getUserPlaylist() {
         if (r.error) {
             console.log('failed to get user playlist: ', r.error);
         } else {
-            AudioBlock.album = r.response;
-            console.log("album: ", AudioBlock.album);
+            AudioData.album = r.response;
+            console.log("album: ", AudioData.album);
 
             getRadioPlaylist();
         }
@@ -50,10 +50,13 @@ function getRadioPlaylist() {
         stream_id : VK.Auth.getSession().user.id
     },
     function(playlist) {
-        AudioBlock.playlist = playlist;
-        console.log("playlist", AudioBlock.playlist);
+        AudioData.playlist = playlist;
+        console.log("playlist", AudioData.playlist);
         
         updateView();
+		initActions();
+		
+		StreamPlayer.playStream(VK.Auth.getSession().user.id);    
     });
 }
 
@@ -65,8 +68,7 @@ function initActions() {
             playlist: songs
         },
         function() {
-            /* Update StreamPlayer */
-            /* Update View (Selection) */
+            StreamPlayer.playStream(VK.Auth.getSession().user.id);
         });
     });
 
@@ -77,8 +79,7 @@ function initActions() {
                 song_id: song.aid
             },
             function() {
-                /* Update StreamPlayer */
-                /* Update View (Selection) */
+                StreamPlayer.playStream(VK.Auth.getSession().user.id);
             });
         },
 
@@ -87,28 +88,38 @@ function initActions() {
                 stream_id: VK.Auth.getSession().user.id
             },
             function() {
-                /* Update StreamPlayer */
-                /* Update View (Selection)*/
+                StreamPlayer.playStream(VK.Auth.getSession().user.id);
             });
         }
     });
+	
+	StreamPlayer.setCallbacks({
+		on_song_changed: function(song) {
+			View.selectSong(song);
+		},
+		
+		on_position_changed: function(percent){
+			//console.log(percent);
+		},
+		
+		on_stream_updated: function() {
+		},
+		
+		on_stream_update_failed: function() {
+			View.clearAllSelections();
+		}
+	});
 }
 
 function updateView() {
 
-    var notInPlaylist = _.filter(AudioBlock.album, function(song) {
-        var found = _.find(AudioBlock.playlist, function(p) {
+    var notInPlaylist = _.filter(AudioData.album, function(song) {
+        var found = _.find(AudioData.playlist, function(p) {
             return p.aid == song.aid && p.owner_id == song.owner_id;
         });
         return !found;
     });
    
     View.setAlbumTracks(notInPlaylist);            
-    View.setPlaylist(AudioBlock.playlist);
-
-    /*if (Audio.current) {
-        View.selectSong(Audio.current);
-    }*/
-    
-    initActions();
+    View.setPlaylist(AudioData.playlist);
 }

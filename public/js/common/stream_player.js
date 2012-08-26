@@ -218,14 +218,19 @@ var PlaybackPlayer = (function() {
 		
 		setCallbacks: function(cb) {
 			callbacks = {
-				on_song_changed: cb.on_song_changed,
-				on_position_changed: cb.on_position_changed
+				on_song_changed: cb.on_song_changed || callbacks.on_song_changed,
+				on_position_changed: cb.on_position_changed || callbacks.on_position_changed
 			}
 		}
 	};
 })();
 
 var StreamPlayer = (function() {
+	
+	var callbacks = {
+		on_stream_updated: function() {},
+		on_stream_update_failed: function() {}
+	};
 	
 	var playing_stream_id,
 		is_stream_update_scheduled = false;
@@ -240,7 +245,7 @@ var StreamPlayer = (function() {
 	}
 	
     return {
-		playStream: function(stream_id) {
+		playStream: function(stream_id, callback) {
 			
 			var before_request_time = new Date().getTime();
 			
@@ -258,15 +263,19 @@ var StreamPlayer = (function() {
 					
 					playing_stream_id = stream_id;
 					
+					callbacks.on_stream_updated();
+					
 				} else {
 					console.log("No playback received");
 					StreamPlayer.stopPlaying();
 					
 					playing_stream_id = undefined;
+					
+					callbacks.on_stream_update_failed();
 				}
 				
 				if (playing_stream_id !== undefined && !is_stream_update_scheduled) {
-					setTimeout(StreamPlayer.updateStream, 60000); // Update once a minute
+					setTimeout(StreamPlayer.updateStream, 30000); // Update every 30 seconds
 					is_stream_update_scheduled = true;			
 				}
 			});
@@ -296,8 +305,14 @@ var StreamPlayer = (function() {
 			return PlaybackPlayer.getPlayingSong();
 		},
 		
-		setCallbacks: function(callbacks) {
-			PlaybackPlayer.setCallbacks(callbacks);
+		setCallbacks: function(cb) {
+			
+			PlaybackPlayer.setCallbacks(cb);
+			
+			callbacks = {
+				on_stream_updated: cb.on_stream_updated || callbacks.on_stream_updated,
+				on_stream_update_failed: cb.on_stream_update_failed || callbacks.on_stream_update_failed
+			};
 		}
     };
 })();

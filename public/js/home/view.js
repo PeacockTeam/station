@@ -18,6 +18,15 @@ var View = (function() {
         });
         li.toggleClass("ui-state-default ui-state-highlight");
     }
+	
+	function clearAllSelections() {
+		$("#playlist").children().each(function(i, e) {
+            clearIfSelected($(e));
+        });		
+		$("#album").children().each(function(i, e) {
+            clearIfSelected($(e));
+        });
+	}
 
     function clearIfSelected(li) {
         if (li.hasClass('ui-state-highlight')) {
@@ -54,9 +63,10 @@ var View = (function() {
 
         selectSong: function(song) {
             var li = $('#' + getUnicSongID(song));
-            console.log(li);
             setSelection(li);
         },
+		
+		clearAllSelections: clearAllSelections,
 
         onPlaylistClicked: function(handlers) {
             $('#album li, #playlist li').click(function(e) {
