@@ -56,6 +56,9 @@ app.get('/radio', function(req, res){
 
 /* API routes */
 
+
+/* Streaming */
+
 app.post('/api/stream/get_playlist', function(req, res) {
     console.log('/api/stream/get_playlist');
     
@@ -115,6 +118,74 @@ app.post('/api/stream/get_playback', function(req, res) {
         }
     });
 });
+
+
+
+
+/* Users */
+
+/*
+app.post('/api/users/get_user', function(req, res) {
+    console.log('/api/users/get_user');
+
+    var stream_id = req.body.user_id;
+
+    StreamManager.getPlayback(stream_id, function(playback) {
+        if (playback) {
+            res.send({ playback : playback });
+        } else {
+            res.send({ error: "failed to get playback" });
+        }
+    });
+});
+
+app.post('/api/users/save_user', function(req, res) {
+    console.log('/api/users/save_user');
+
+    var stream_id = req.body.user_id;
+
+    StreamManager.getPlayback(stream_id, function(playback) {
+        if (playback) {
+            res.send({ playback : playback });
+        } else {
+            res.send({ error: "failed to get playback" });
+        }
+    });
+});
+*/
+
+/* Stations */
+ /*
+app.post('/api/users/get_station', function(req, res) {
+    console.log('/api/users/get_station');
+
+    var stream_id = req.body.station_id;
+
+    StreamManager.getPlayback(stream_id, function(playback) {
+        if (playback) {
+            res.send({ playback : playback });
+        } else {
+            res.send({ error: "failed to get playback" });
+        }
+    });
+});
+
+app.post('/api/users/save_station', function(req, res) {
+    console.log('/api/users/save_station');
+
+    var stream_id = req.body.station_id;
+
+    StreamManager.getPlayback(stream_id, function(playback) {
+        if (playback) {
+            res.send({ playback : playback });
+        } else {
+            res.send({ error: "failed to get playback" });
+        }
+    });
+});
+*/
+
+
 
 app.listen(8080);
 console.log("Express is running...");
